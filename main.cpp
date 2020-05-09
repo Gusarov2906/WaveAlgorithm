@@ -178,7 +178,7 @@ Map load_map()
 
 }
 
-void rezise_to_min(sf::RenderWindow window)
+void resize_to_min(sf::RenderWindow &window)
 {
 	if (window.getSize().x < sf::Vector2u(WindowWidth, WindowHeight).x)
 		window.setSize(sf::Vector2u(WindowWidth, window.getSize().y));
@@ -190,19 +190,14 @@ void rezise_to_min(sf::RenderWindow window)
 void draw_graphics(Map map)
 {
 	sf::RenderWindow window(sf::VideoMode(map.map_size.width*RectangleWidth+RectangleOutline, map.map_size.height*RectangleHeight+RectangleOutline), "Wave_alg", sf::Style::Default);
-	if (window.getSize().x < sf::Vector2u(1026, 770).x)
-		window.setSize(sf::Vector2u(1026, window.getSize().y));
-	if (window.getSize().y < sf::Vector2u(1026, 770).y)
+	resize_to_min(window);
 		window.setSize(sf::Vector2u(window.getSize().x, 770));
 	while (window.isOpen())
 	{
 		sf::Event event;
 		while (window.pollEvent(event))
 		{
-			if (window.getSize().x < sf::Vector2u(1026, 770).x)
-				window.setSize(sf::Vector2u(1026, window.getSize().y));
-			if (window.getSize().y < sf::Vector2u(1026, 770).y)
-				window.setSize(sf::Vector2u(window.getSize().x, 770));
+			resize_to_min(window);
 			if (event.type == sf::Event::Closed)
 				window.close();
 		}
