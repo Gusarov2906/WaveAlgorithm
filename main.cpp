@@ -16,12 +16,21 @@
 #define MaxMapSizeX 8
 #define MaxMapSizeY 8
 
+
 //structure for save current map size
 struct MapSize
 {
 public:
 	int width;
 	int height;
+};
+
+//structure to return from load func
+struct Map
+{
+public:
+	MapSize map_size;
+	char** array;
 };
 
 //platform is block in the map whitch can be road or wall
@@ -129,34 +138,82 @@ public:
 	}
 };
 
-//block of code for graphics
-void draw_graphics()
-{
-	sf::RenderWindow window(sf::VideoMode(WindowWidth, WindowHeight), "Wave_alg", sf::Style::Close);
 
+//load map from .txt and convert it in char*
+Map load_map()
+{
+	std::ifstream fin("map.txt");
+	if (!fin.is_open())
+		std::cout << "Can't open file with map!" << std::endl;
+	else
+	{
+		std::string size;
+
+		MapSize map_size;
+
+		fin >> map_size.height >> map_size.width;
+		if (map_size.width > MaxMapSizeX || map_size.height > MaxMapSizeY || map_size.width <= 0 || map_size.height <= 0)
+		{
+			std::cout << "Bad size of map!" << std::endl;
+		}
+		std::cout << "Map size: ";
+		std::cout << map_size.height << "x" << map_size.width << std::endl << std::endl;
+		char** data = new char* [map_size.height];
+		std::cout << "Map: " << std::endl << std::endl;
+		for (int i = 0; i < map_size.height; i++)
+		{
+			data[i] = new char[map_size.width];
+			for (int j = 0; j < map_size.width; j++)
+			{
+				fin >> data[i][j];
+				std::cout << data[i][j]<<" ";
+			}
+			std::cout << std::endl;
+		}
+		Map param;
+		param.map_size = map_size;
+		param.array = data;
+		return param;
+	}
+
+}
+
+//block of code for graphics
+void draw_graphics(Map map)
+{
+	sf::RenderWindow window(sf::VideoMode(map.map_size.width*RectangleWidth+RectangleOutline, map.map_size.height*RectangleHeight+RectangleOutline), "Wave_alg", sf::Style::Default);
 	while (window.isOpen())
 	{
 		sf::Event event;
 		while (window.pollEvent(event))
 		{
+			if (window.getSize().x < sf::Vector2u(1026, 770).x)
+				window.setSize(sf::Vector2u(1026, window.getSize().y));
+			if (window.getSize().y < sf::Vector2u(1026, 770).y)
+				window.setSize(sf::Vector2u(window.getSize().x, 770));
 			if (event.type == sf::Event::Closed)
 				window.close();
 		}
 
 		window.clear();
 
-		Platform* platforms = new Platform[96];
-		int k = 0;
-		for (int i = 0; i < 8; i++)
+		Platform** platforms = new Platform*[map.map_size.height];
+		for (int i = 0; i < map.map_size.height; i++)
 		{
-			for (int j = 0; j < 12; j++)
+			platforms[i] = new Platform[map.map_size.width];
+			for (int j = 0; j < map.map_size.width; j++)
 			{
-				platforms[k] = Platform(i, j, RectangleWidth * i, RectangleHeight * j, RectangleWidth, RectangleHeight);
-				platforms[k].draw(window);
-				k++;
+				platforms[i][j] = Platform(i, j, RectangleWidth * j, RectangleHeight * i, RectangleWidth, RectangleHeight);
+				if (map.array[i][j] == '1')
+					platforms[i][j].set_wall();
+				else if (map.array[i][j] == 'A')
+					platforms[i][j].set_start_point();
+				else if (map.array[i][j] == 'B')
+					platforms[i][j].set_finish_point();
+				platforms[i][j].draw(window);
 			}
 		}
-
+		/*
 		platforms[2].set_start_point();
 		platforms[2].draw(window);
 		platforms[80].set_finish_point();
@@ -166,50 +223,17 @@ void draw_graphics()
 			platforms[i].set_wall();
 			platforms[i].draw(window);
 		}
-
+		*/
 
 		window.display();
 	}
 }
 
-//load map from .txt and convert it in char*
-void load_map()
-{
-	std::ifstream fin("map.txt");
-	if (!fin.is_open())
-		std::cout << "Can't open file with map!\n"<<std::endl;
-	else
-	{
-		std::string size;
-
-		MapSize map_size;
-
-		fin >> map_size.width >> map_size.height;
-		if (map_size.width > MaxMapSizeX || map_size.height > MaxMapSizeY || map_size.width <= 0 || map_size.height)
-		{
-			std::cout << "Bad size of map!\n" << std::endl;
-			return;
-		}
-		std::cout << map_size.width <<" "<< map_size.height << std::endl;
-		char* data = new char[map_size.width * map_size.height];
-		for (int i = 0; i < map_size.height; i++)
-		{
-			for (int j = 0; j < map_size.width; j++)
-			{
-				fin >> data[i * map_size.height + j];
-				std::cout << data[i * map_size.height + j];
-			}
-			std::cout << std::endl;
-		}
-	}
-
-	
-}
-
 //main body
 int main()
 {
-	load_map();
-	draw_graphics();
+	Map map;
+	map = load_map();
+	draw_graphics(map);
 	return 0;
 }
