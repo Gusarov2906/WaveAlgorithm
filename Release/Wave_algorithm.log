@@ -1,0 +1,6 @@
+﻿  Создание кода
+  Previous IPDB not found, fall back to full compilation.
+E:\PROJECTS\VisualStudioProjects\Wave_algorithm\main.cpp(288): warning C4715: load_map: значение возвращается не при всех путях выполнения
+  All 408 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Создание кода завершено
+  Wave_algorithm.vcxproj -> E:\PROJECTS\VisualStudioProjects\Wave_algorithm\x64\Release\Wave_algorithm.exe
